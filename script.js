@@ -1,94 +1,73 @@
-const apiKey = '5e383028b875f72d2864f0d492d3dce2';
+const cities = [
+  { name: "北京", country: "CN" },
+  { name: "上海", country: "CN" },
+  { name: "广州", country: "CN" },
+  { name: "深圳", country: "CN" },
+  { name: "天津", country: "CN" },
+  { name: "重庆", country: "CN" },
+  { name: "南京", country: "CN" },
+  { name: "杭州", country: "CN" },
+  { name: "苏州", country: "CN" },
+  { name: "武汉", country: "CN" },
+  { name: "成都", country: "CN" },
+  { name: "西安", country: "CN" },
+  { name: "长沙", country: "CN" },
+  { name: "郑州", country: "CN" },
+  { name: "青岛", country: "CN" },
+  { name: "沈阳", country: "CN" },
+  { name: "大连", country: "CN" },
+  { name: "哈尔滨", country: "CN" },
+  { name: "济南", country: "CN" },
+  { name: "合肥", country: "CN" },
 
-const cityInput = document.getElementById('cityInput');
-const suggestions = document.getElementById('suggestions');
-const searchBtn = document.getElementById('searchBtn');
-const weatherCard = document.getElementById('weatherCard');
-const cityNameEl = document.getElementById('cityName');
-const weatherDescEl = document.getElementById('weatherDesc');
-const tempEl = document.getElementById('temp');
-const humidityEl = document.getElementById('humidity');
-const windEl = document.getElementById('wind');
-const weatherIconEl = document.getElementById('weatherIcon');
+  // 日本
+  { name: "东京", country: "JP" },
+  { name: "大阪", country: "JP" },
+  { name: "名古屋", country: "JP" },
+  { name: "札幌", country: "JP" },
+  { name: "福冈", country: "JP" },
+  { name: "横滨", country: "JP" },
 
-// 简单中文模糊搜索
-cityInput.addEventListener('input', () => {
-  const val = cityInput.value.trim().toLowerCase();
-  if (!val) {
-    suggestions.innerHTML = '';
-    suggestions.style.display = 'none';
-    return;
-  }
-  const matched = cities.filter(c => c.name.includes(val) || c.name.toLowerCase().includes(val));
-  if (matched.length === 0) {
-    suggestions.innerHTML = '<li class="p-2">无匹配城市</li>';
-    suggestions.style.display = 'block';
-    return;
-  }
-  suggestions.innerHTML = matched.map(c => `<li class="p-2 cursor-pointer hover:bg-gray-300" data-name="${c.name}">${c.name} (${c.country})</li>`).join('');
-  suggestions.style.display = 'block';
-});
+  // 韩国
+  { name: "首尔", country: "KR" },
+  { name: "釜山", country: "KR" },
+  { name: "仁川", country: "KR" },
+  { name: "大邱", country: "KR" },
 
-// 点击选中建议
-suggestions.addEventListener('click', e => {
-  if (e.target.tagName.toLowerCase() === 'li' && e.target.dataset.name) {
-    cityInput.value = e.target.dataset.name;
-    suggestions.style.display = 'none';
-  }
-});
+  // 美国
+  { name: "纽约", country: "US" },
+  { name: "洛杉矶", country: "US" },
+  { name: "芝加哥", country: "US" },
+  { name: "休斯顿", country: "US" },
+  { name: "费城", country: "US" },
+  { name: "凤凰城", country: "US" },
 
-// 根据天气代码返回对应的Emoji和背景色（简易版）
-function getWeatherTheme(weatherId) {
-  if (weatherId >= 200 && weatherId < 300) return { icon: '⛈️', bg: 'linear-gradient(135deg, #373B44, #4286f4)' }; // 雷暴雨
-  if (weatherId >= 300 && weatherId < 600) return { icon: '🌧️', bg: 'linear-gradient(135deg, #3a7bd5, #00d2ff)' }; // 雨
-  if (weatherId >= 600 && weatherId < 700) return { icon: '❄️', bg: 'linear-gradient(135deg, #83a4d4, #b6fbff)' }; // 雪
-  if (weatherId >= 700 && weatherId < 800) return { icon: '🌫️', bg: 'linear-gradient(135deg, #757f9a, #d7dde8)' }; // 雾
-  if (weatherId === 800) return { icon: '☀️', bg: 'linear-gradient(135deg, #f6d365, #fda085)' }; // 晴
-  if (weatherId > 800) return { icon: '☁️', bg: 'linear-gradient(135deg, #bdc3c7, #2c3e50)' }; // 多云
-  return { icon: '❓', bg: 'linear-gradient(135deg, #232526, #1c1c1c)' };
-}
+  // 欧洲主要城市
+  { name: "伦敦", country: "GB" },
+  { name: "巴黎", country: "FR" },
+  { name: "柏林", country: "DE" },
+  { name: "马德里", country: "ES" },
+  { name: "罗马", country: "IT" },
+  { name: "莫斯科", country: "RU" },
+  { name: "阿姆斯特丹", country: "NL" },
+  { name: "布鲁塞尔", country: "BE" },
+  { name: "维也纳", country: "AT" },
 
-// 查询天气
-async function fetchWeather(city) {
-  try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=zh_cn`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('请求失败，可能城市不存在或API限制');
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    alert(err.message);
-    throw err;
-  }
-}
+  // 澳洲
+  { name: "悉尼", country: "AU" },
+  { name: "墨尔本", country: "AU" },
+  { name: "布里斯班", country: "AU" },
 
-// 更新界面
-function updateWeatherUI(data) {
-  const weatherId = data.weather[0].id;
-  const { icon, bg } = getWeatherTheme(weatherId);
+  // 其他常见城市
+  { name: "新德里", country: "IN" },
+  { name: "孟买", country: "IN" },
+  { name: "德里", country: "IN" },
+  { name: "曼谷", country: "TH" },
+  { name: "新加坡", country: "SG" },
+  { name: "吉隆坡", country: "MY" },
+  { name: "雅加达", country: "ID" },
+  { name: "开罗", country: "EG" },
+  { name: "约翰内斯堡", country: "ZA" },
 
-  document.body.style.background = bg;
-  cityNameEl.textContent = `${data.name}, ${data.sys.country}`;
-  weatherDescEl.textContent = data.weather[0].description;
-  tempEl.textContent = data.main.temp.toFixed(1);
-  humidityEl.textContent = data.main.humidity;
-  windEl.textContent = data.wind.speed;
-  weatherIconEl.textContent = icon;
-
-  weatherCard.style.display = 'block';
-}
-
-// 点击查询按钮事件
-searchBtn.addEventListener('click', async () => {
-  const city = cityInput.value.trim();
-  if (!city) {
-    alert('请输入城市名称');
-    return;
-  }
-  try {
-    const data = await fetchWeather(city);
-    updateWeatherUI(data);
-  } catch (err) {
-    weatherCard.style.display = 'none';
-  }
-});
+  // 可按需继续添加
+];
