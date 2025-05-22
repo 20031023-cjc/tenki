@@ -1,139 +1,62 @@
-// API key
-const API_KEY = 'da7be22a064e8e36c8e9385be0d67fc4';
+const apiKey = "da7be22a064e8e36c8e9385be0d67fc4";
 
-// 简易热门城市库（城市名/英名）
-const citiesDB = [
-  { ja: '東京', en: 'Tokyo' },
-  { ja: '大阪', en: 'Osaka' },
-  { ja: '京都', en: 'Kyoto' },
-  { ja: '札幌', en: 'Sapporo' },
-  { ja: '福岡', en: 'Fukuoka' },
-  { ja: 'ニューヨーク', en: 'New York' },
-  { ja: 'ロンドン', en: 'London' },
-  { ja: 'パリ', en: 'Paris' },
-  { ja: 'シドニー', en: 'Sydney' },
-  { ja: 'バンコク', en: 'Bangkok' },
-  { ja: '北京', en: 'Beijing' },
-  { ja: '上海', en: 'Shanghai' },
-];
+function getWeatherIcon(iconCode) {
+  const iconMap = {
+    "01d": "☀️",
+    "01n": "🌙",
+    "02d": "🌤️",
+    "02n": "☁️🌙",
+    "03d": "☁️",
+    "03n": "☁️",
+    "04d": "☁️",
+    "04n": "☁️",
+    "09d": "🌧️",
+    "09n": "🌧️",
+    "10d": "🌦️",
+    "10n": "🌧️🌙",
+    "11d": "⛈️",
+    "11n": "⛈️",
+    "13d": "❄️",
+    "13n": "❄️",
+    "50d": "🌫️",
+    "50n": "🌫️"
+  };
+  return iconMap[iconCode] || "🌈";
+}
 
-// 语言文本配置
-const texts = {
-  ja: {
-    title: '世界の天気',
-    placeholder: '都市名を入力',
-    search: '検索',
-    locate: '現在地を取得',
-    favoritesTitle: 'お気に入りの都市',
-    back: '戻る',
-    errorNotFound: '都市が見つかりません。',
-    errorGeo: '位置情報を取得できません。',
-    recommendation: (temp) => {
-      if (temp >= 30) return '今日はとても暑いです。水分補給を忘れずに！';
-      if (temp >= 20) return '快適な天気です。外に出かけましょう！';
-      if (temp >= 10) return '少し肌寒いので、羽織るものを持ってください。';
-      return '寒いので暖かくしてください。';
-    },
-  },
-  en: {
-    title: 'World Weather',
-    placeholder: 'Enter city name',
-    search: 'Search',
-    locate: 'Get Location',
-    favoritesTitle: 'Favorite Cities',
-    back: 'Back',
-    errorNotFound: 'City not found.',
-    errorGeo: 'Unable to get location.',
-    recommendation: (temp) => {
-      if (temp >= 30) return 'It’s very hot today. Stay hydrated!';
-      if (temp >= 20) return 'Comfortable weather. Let’s go outside!';
-      if (temp >= 10) return 'A bit chilly, bring a jacket.';
-      return 'Cold, keep warm!';
-    },
-  },
-};
+async function getWeather() {
+  const city = document.getElementById("cityInput").value.trim();
+  const resultDiv = document.getElementById("weatherResult");
 
-let currentLang = 'ja';
-let favorites = [];
+  if (!city) {
+    resultDiv.innerHTML = '<p class="text-red-500">请输入城市名称！</p>';
+    return;
+  }
 
-// DOM Elements
-const titleEl = document.getElementById('title');
-const cityInput = document.getElementById('city-input');
-const searchBtn = document.getElementById('search-btn');
-const locateBtn = document.getElementById('locate-btn');
-const autocompleteList = document.getElementById('autocomplete-list');
-const weatherDisplay = document.getElementById('weather-display');
-const favoritesList = document.getElementById('favorites-list');
-const favoritesTitle = document.getElementById('favorites-title');
-const langSelect = document.getElementById('language-select');
-const themeToggle = document.getElementById('theme-toggle');
+  resultDiv.innerHTML = '<p>查询中...</p>';
 
-// 初始化本地收藏
-function loadFavorites() {
-  const data = localStorage.getItem('weatherFavorites');
-  if (data) {
-    favorites = JSON.parse(data);
-  } else {
-    favorites = [];
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=zh_cn`
+    );
+    const data = await response.json();
+
+    if (data.cod !== 200) {
+      resultDiv.innerHTML = `<p class="text-red-500">${data.message}</p>`;
+      return;
+    }
+
+    const icon = getWeatherIcon(data.weather[0].icon);
+    const weatherHTML = `
+      <div class="bg-blue-100 rounded-xl shadow-lg p-4 mt-4 animate-slideIn">
+        <h2 class="text-2xl font-bold mb-2">${data.name}, ${data.sys.country}</h2>
+        <p class="text-4xl">${icon} ${data.main.temp.toFixed(1)}°C</p>
+        <p class="capitalize text-gray-700 mt-1">${data.weather[0].description}</p>
+        <p class="text-sm text-gray-500 mt-2">湿度：${data.main.humidity}% | 风速：${data.wind.speed} m/s</p>
+      </div>
+    `;
+    resultDiv.innerHTML = weatherHTML;
+  } catch (error) {
+    resultDiv.innerHTML = `<p class="text-red-500">查询失败，请稍后重试。</p>`;
   }
 }
-
-// 保存收藏
-function saveFavorites() {
-  localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
-}
-
-// 切换语言文本
-function updateTexts() {
-  const t = texts[currentLang];
-  titleEl.textContent = t.title;
-  cityInput.placeholder = t.placeholder;
-  searchBtn.textContent = '🔍';
-  locateBtn.textContent = '📍';
-  favoritesTitle.textContent = t.favoritesTitle;
-  document.querySelectorAll('.back-text').forEach(el => el.textContent = t.back);
-}
-
-// 主题切换
-function toggleTheme() {
-  document.body.classList.toggle('dark');
-  const isDark = document.body.classList.contains('dark');
-  themeToggle.textContent = isDark ? '☀️' : '🌙';
-}
-
-// 格式化时间
-function formatTime(timestamp, timezone) {
-  const d = new Date((timestamp + timezone) * 1000);
-  return d.toUTCString().slice(-12, -7);
-}
-
-// 创建天气卡片DOM
-function createWeatherCard(data, isFavorite = false) {
-  const t = texts[currentLang];
-  const template = document.getElementById('weather-card-template');
-  const card = template.content.firstElementChild.cloneNode(true);
-
-  card.querySelector('.city-name').textContent = `${data.name}, ${data.sys.country}`;
-  card.querySelector('.temp').textContent = `${Math.round(data.main.temp)}°C`;
-  card.querySelector('.weather-main').textContent = data.weather[0].description;
-  card.querySelector('.weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-  card.querySelector('.weather-icon').alt = data.weather[0].description;
-
-  card.querySelector('.wind').textContent = data.wind.speed;
-  card.querySelector('.humidity').textContent = data.main.humidity;
-  card.querySelector('.pressure').textContent = data.main.pressure;
-  card.querySelector('.sunrise').textContent = formatTime(data.sys.sunrise, data.timezone);
-  card.querySelector('.sunset').textContent = formatTime(data.sys.sunset, data.timezone);
-
-  card.querySelector('.recommendation').textContent = t.recommendation(data.main.temp);
-
-  // 收藏按钮状态
-  const favBtn = card.querySelector('.fav-btn');
-  const isFav = favorites.some(f => f.id === data.id);
-  if (isFav) favBtn.classList.add('favorited');
-
-  favBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (favorites.some(f => f.id === data.id)) {
-      favorites = favorites.filter(f => f.id !== data.id);
-      favBtn.classList
