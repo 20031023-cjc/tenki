@@ -1,44 +1,68 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌤 全球天气查询</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Nunito', 'sans-serif']
-          },
-          animation: {
-            fadeIn: 'fadeIn 1s ease-out',
-            slideIn: 'slideIn 0.5s ease-out'
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: 0 },
-              '100%': { opacity: 1 }
-            },
-            slideIn: {
-              '0%': { transform: 'translateY(-20px)', opacity: 0 },
-              '100%': { transform: 'translateY(0)', opacity: 1 }
-            }
-          }
-        }
-      }
-    }
-  </script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>精美天气查询</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+<style>
+  /* 动态背景模糊及颜色变化 */
+  body {
+    transition: background 1.5s ease;
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    min-height: 100vh;
+  }
+  /* 天气图标动画示例 */
+  .icon-sun {
+    animation: spin 10s linear infinite;
+  }
+  @keyframes spin {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+  }
+  /* 搜索建议列表 */
+  #suggestions {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+</style>
 </head>
-<body class="bg-gradient-to-br from-blue-200 to-purple-300 font-sans p-4 flex items-center justify-center min-h-screen">
-  <div class="container bg-white rounded-2xl shadow-xl p-6 text-center w-full max-w-md animate-fadeIn">
-    <h1 class="text-3xl font-bold mb-4">🌍 全球天气查询</h1>
-    <input id="cityInput" type="text" placeholder="输入城市名" class="px-4 py-2 rounded-full border-2 w-full max-w-xs mb-4 focus:outline-none focus:border-blue-400 transition">
-    <button onclick="getWeather()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition shadow-md">查询</button>
-    <div id="weatherResult" class="mt-6 text-lg text-gray-800"></div>
+<body class="flex flex-col items-center justify-start p-6 text-white">
+
+  <h1 class="text-4xl font-bold mb-6 drop-shadow-lg">🌤 精美天气查询</h1>
+
+  <div class="w-full max-w-md relative">
+    <input
+      id="cityInput"
+      type="text"
+      placeholder="输入城市名（中文支持模糊搜索）"
+      class="w-full p-3 rounded-lg text-black shadow-lg"
+      autocomplete="off"
+    />
+    <ul id="suggestions" class="absolute bg-white text-black w-full rounded-b-lg shadow-lg hidden"></ul>
   </div>
-  <script src="script.js"></script>
+
+  <button id="searchBtn" class="mt-4 px-6 py-3 bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">查询天气</button>
+
+  <div id="weatherCard" class="mt-8 bg-black bg-opacity-40 rounded-xl p-6 w-full max-w-md shadow-lg hidden">
+    <div class="flex items-center space-x-4">
+      <div id="weatherIcon" class="text-6xl"></div>
+      <div>
+        <h2 id="cityName" class="text-3xl font-semibold"></h2>
+        <p id="weatherDesc" class="capitalize text-xl"></p>
+      </div>
+    </div>
+    <div class="mt-4 text-lg space-y-2">
+      <p>温度: <span id="temp"></span> °C</p>
+      <p>湿度: <span id="humidity"></span> %</p>
+      <p>风速: <span id="wind"></span> m/s</p>
+    </div>
+  </div>
+
+  <script src="cities.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
