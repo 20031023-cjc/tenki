@@ -1,74 +1,44 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>世界の天気 / World Weather</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌤 全球天气查询</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif']
+          },
+          animation: {
+            fadeIn: 'fadeIn 1s ease-out',
+            slideIn: 'slideIn 0.5s ease-out'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 }
+            },
+            slideIn: {
+              '0%': { transform: 'translateY(-20px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 }
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <header>
-    <h1 id="title">世界の天気</h1>
-    <div class="controls">
-      <select id="language-select" aria-label="言語選択 / Language Select">
-        <option value="ja" selected>日本語</option>
-        <option value="en">English</option>
-      </select>
-      <button id="theme-toggle" aria-label="テーマ切り替え / Toggle Theme">🌙</button>
-    </div>
-  </header>
-
-  <main>
-    <section class="search-section">
-      <div class="search-box">
-        <input
-          type="text"
-          id="city-input"
-          placeholder="都市名を入力 / Enter city name"
-          autocomplete="off"
-          aria-label="都市名入力 / City name input"
-        />
-        <button id="search-btn" aria-label="検索 / Search">🔍</button>
-        <button id="locate-btn" aria-label="現在地を取得 / Get Location">📍</button>
-      </div>
-      <ul id="autocomplete-list" class="autocomplete-list"></ul>
-    </section>
-
-    <section id="weather-display" class="weather-display">
-      <!-- 天気カード将在这里生成 -->
-    </section>
-
-    <section class="favorites-section">
-      <h2 id="favorites-title">お気に入りの都市</h2>
-      <div id="favorites-list" class="favorites-list">
-        <!-- 收藏城市卡片 -->
-      </div>
-    </section>
-  </main>
-
-  <template id="weather-card-template">
-    <div class="weather-card">
-      <div class="card-front">
-        <h3 class="city-name"></h3>
-        <div class="temp"></div>
-        <img class="weather-icon" alt="weather icon" />
-        <div class="weather-main"></div>
-        <div class="recommendation"></div>
-      </div>
-      <div class="card-back">
-        <ul class="details-list">
-          <li><strong>風速 / Wind Speed:</strong> <span class="wind"></span> m/s</li>
-          <li><strong>湿度 / Humidity:</strong> <span class="humidity"></span> %</li>
-          <li><strong>気圧 / Pressure:</strong> <span class="pressure"></span> hPa</li>
-          <li><strong>日の出 / Sunrise:</strong> <span class="sunrise"></span></li>
-          <li><strong>日の入 / Sunset:</strong> <span class="sunset"></span></li>
-        </ul>
-        <button class="back-btn">← <span class="back-text">戻る / Back</span></button>
-      </div>
-      <button class="fav-btn" aria-label="お気に入りに追加 / Add to favorites">⭐</button>
-    </div>
-  </template>
-
+<body class="bg-gradient-to-br from-blue-200 to-purple-300 font-sans p-4 flex items-center justify-center min-h-screen">
+  <div class="container bg-white rounded-2xl shadow-xl p-6 text-center w-full max-w-md animate-fadeIn">
+    <h1 class="text-3xl font-bold mb-4">🌍 全球天气查询</h1>
+    <input id="cityInput" type="text" placeholder="输入城市名" class="px-4 py-2 rounded-full border-2 w-full max-w-xs mb-4 focus:outline-none focus:border-blue-400 transition">
+    <button onclick="getWeather()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition shadow-md">查询</button>
+    <div id="weatherResult" class="mt-6 text-lg text-gray-800"></div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
